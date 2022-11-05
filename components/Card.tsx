@@ -1,4 +1,3 @@
-import 
 export default function Card({
   title,
   value,
