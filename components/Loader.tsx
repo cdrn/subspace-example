@@ -2,7 +2,7 @@
  * A simple loading spinner component.
  * We can separate out the SVG and host it in the /public folder to decrease time to first load -- but for now i think we are fine :)
  */
-export default function Loader({ loadingText }: { loadingText: string }) {
+export default function Loader({ loadingText }: { loadingText?: string }) {
   return (
     <div className="flex items-center justify-center space-x-2">
       <div role="status">
@@ -21,7 +21,7 @@ export default function Loader({ loadingText }: { loadingText: string }) {
             fill="currentFill"
           />
         </svg>
-        <span className="sr-only">Loading...</span>
+        <span className="sr-only">{loadingText}</span>
       </div>
     </div>
   );

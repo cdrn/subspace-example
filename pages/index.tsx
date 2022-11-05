@@ -1,8 +1,13 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import { ApiPromise, WsProvider } from "@polkadot/api";
+import { ApiPromise } from "@polkadot/api";
+import numeral from "numeral";
 import Loader from "../components/Loader";
+import Card from "../components/Card";
 import { instantiateApi } from "../utils/utils";
+
+// Key is the offender, value is the offence IDs.
+type OffencesMap = Record<string, string[]>;
 
 export default function Home() {
   // instantiate the polkadotJS API connection to the default node
@@ -10,8 +15,12 @@ export default function Home() {
   const [api, setApi] = useState<null | ApiPromise>(null);
 
   // Subscribed stats for this page
-  const [blockHeight, setBlockHeight] = useState<Number>();
-  const [offences, setOffences] = useState<any>();
+  const [blockHeight, setBlockHeight] = useState<string | undefined>();
+  const [offences, setOffences] = useState<
+    Record<string, string[]> | undefined
+  >();
+  const [numOffences, setNumOffences] = useState<number | undefined>();
+  const [currentEon, setCurrentEon] = useState<string | undefined>();
 
   useEffect(() => {
     // Call the async function with a sideffect to set the API at the top level.
@@ -19,17 +28,36 @@ export default function Home() {
   }, []);
 
   // Set up subscriptions required for this page's data
-  // NOTE: The responses from polkadotJS are not typed. We could use something like Zod to handle this.
+  // NOTE: Some returns from PolkadotJS are not typed. We could use something like Zod to handle this.
+  // I won't, because of time constraints - but could be nice to handle unexpected data.
   // TODO: Remove any
   useEffect(() => {
     if (api) {
       api.query.system.number((blockHeight: any) => {
         setBlockHeight(blockHeight.toJSON());
       });
+      // Handles offences //
       api.query.offencesSubspace.reports.entries((offences: any) => {
-        offences.forEach(([]) => {
-          console.log(offence[0].toJSON(), offence[1].toJSON());
+        const updatedOffences: OffencesMap = {};
+        // Set the number of offences by counting the entries
+        setNumOffences(offences.length);
+        offences.forEach(([offence, offender]: [any, any]) => {
+          const offenderOutput = offender.toJSON().offender;
+          const offenceOutput = offence.toJSON();
+          if (updatedOffences[offenderOutput] === undefined) {
+            updatedOffences[offenderOutput] = [];
+          }
+          updatedOffences[offenderOutput].push(offenceOutput);
         });
+        setOffences(updatedOffences);
+      });
+      // Handles current eon
+      api.query.subspace.eonIndex((index: any) => {
+        setCurrentEon(index.toJSON());
+      });
+      // Current Blockheight
+      api.query.system.number((blocknum: any) => {
+        setBlockHeight(blocknum.toJSON());
       });
     }
   }, [api]);
@@ -45,17 +73,62 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="font-mono vh-100">
+      <main className="font-mono vh-100 mx-20">
         {/* This title should be constant */}
         <div className="title-box flex flex-col justify-center font-mono items-center space-y-4 h-[200px]">
-          <h1 className="text-2xl">Subspace Dashboard</h1>
-          <p>The dashboard tracks key metrics on the subspace network</p>
+          <h1 className="text-2xl">SubMetrics</h1>
+          <p>
+            This dashboard tracks key, real-time metrics on the subspace
+            network. Enjoy!
+          </p>
         </div>
         {/* The body of the page -- changes happen here! */}
         <div>
           {/* Pop a full page loading mask while we instantiate the WS connection */}
           {!api && <Loader loadingText="Establishing connection..." />}
-          {api && <div>Api loaded!</div>}
+          {/* Otherwise, display data */}
+          {api && (
+            <div className="container flex flex-col space-y-24">
+              <div className="flex justify-center space-x-4">
+                <Card title="Current Eon" value={currentEon} />
+                <Card
+                  title="Blockheight"
+                  value={numeral(blockHeight).format("0,0")}
+                />
+                <Card
+                  title="Offences"
+                  value={numeral(numOffences).format("0,0")}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {/* Offences table */}
+                <div className="flex flex-col space-y-10">
+                  <h1 className="text-xl text-center">Offences</h1>
+                  <table className="table-fixed w-full">
+                    <thead>
+                      <tr>
+                        <th>Offender</th>
+                        <th>Offence IDs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(offences || []).map((offence) => (
+                        <tr className="break-words">
+                          <td className="p-4">{offence[0]}</td>
+                          <td className="p-4">
+                            {offence[1].map((offenceId) => (
+                              <p>{offenceId}</p>
+                            ))}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div>placeholder</div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

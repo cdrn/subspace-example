@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    colors: {
+      "subspacePurple": "rgb(86,43,142)",
+      "subspacePurpleLighter": "rgba(86,43,142,.6)"
+    }
   },
   plugins: [],
 }
