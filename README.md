@@ -1,34 +1,26 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# SubMetrics
+
+SubMetrics is a dashboard designed to deliver key metrics on the subscan network in real time! Submetrics processes insights directly from a Subspace node such that you have full control of the data.
+
+The app works on mobile -- for those times where you just don't want to fumble around PolkadotJS
+
+Hacked out over a few hours using nextJS. The app can also be compiled statically and hosted on Arweave with a few tweaks.
 
 ## Getting Started
 
 First, run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
+pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Voila! The app should run on `localhost:3000`. An example of the app deployed can be found (here)[https://subspace-example.vercel.app/].
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Avenues of improvement/Coming soon!
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Submetrics is a couple of hour scaffold project. Here is what i envisage as the main avenues for improvement for the project:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Add the ability for the user to provide their own node. This becomes much more useful/resillient if a user is able to supply their own light node! This could be done by simply storing the node's URI in localstorage and doing a check against compatible runtime versions before connecting. This should be paired with...
+- Improved error handling. I'm sure there are potential hanging error states here - this becomes much more important when we allow a user to supply their own node. Error messages need to make sense, and we need to make reasonable assumptions. PolkadotJS will just refresh forever.
+- Snapshot tests - This will be useful for us to prevent regressions.
+- Expand on/add more statistics based on feedback. Truth is, i don't really know what the key metrics are for subspace yet. I think interviewing users/engineers and understanding what they'd actually like to see could take this to the next level. There are probably a lot of stats that could be added with custom RPCs - things like number of nodes on the network, total storage space available, average/median plot size might be interesting!
