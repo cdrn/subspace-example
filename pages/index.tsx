@@ -113,11 +113,11 @@ export default function Home() {
                     </thead>
                     <tbody>
                       {Object.entries(offences || []).map((offence) => (
-                        <tr className="break-words">
+                        <tr className="break-words" key={offence[0]}>
                           <td className="p-4">{offence[0]}</td>
                           <td className="p-4">
                             {offence[1].map((offenceId) => (
-                              <p>{offenceId}</p>
+                              <p key={offenceId}>{offenceId}</p>
                             ))}
                           </td>
                         </tr>
