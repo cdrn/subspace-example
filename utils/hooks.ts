@@ -4,7 +4,7 @@ import { useState } from 'react'
 import BigNumber from 'bignumber.js'
 
 export type usePlanckInput = BigNumber | string | number | undefined
-export type UsePlanckReturn = [BigNumber | undefined, (value: useBigNumberInput) => void, BigNumber | undefined]
+export type UsePlanckReturn = [BigNumber | undefined, (value: usePlanckInput) => void, BigNumber | undefined]
 
 // Allows us to store SSC vals as base units -- in this case, i am assuming plancks.
 // This can be extended to allow for omnidirectional setting/retrieval, such that we:
@@ -14,20 +14,24 @@ export function useSsc(defaultValue: usePlanckInput): UsePlanckReturn {
     const [planckVal, setPlanckVal] = useState<BigNumber | undefined>()
     const [sscVal, setSscVal] = useState<BigNumber | undefined>()
 
-
     // Coerce our input value to a big number, and then set it in the local useState
-    const setPlanckValExternal = (value: useBigNumberInput) => {
+    const setPlanckValExternal = (value: usePlanckInput) => {
         if (value === undefined) return; // Escape hatch as BigNumber can't handle undefined
 
         let coercedVal = value;
+        // Handle number input
         if (typeof value === "number") {
             coercedVal = value.toString()
         }
-
         coercedVal as BigNumber | string
+
         const bignumberifiedVal = new BigNumber(coercedVal);
         setPlanckVal(bignumberifiedVal)
-        setSscVal(bignumberifiedVal.dividedBy(10**10))
+        return setSscVal(bignumberifiedVal.dividedBy(10**10))
+    }
+
+    if (!planckVal && !sscVal) {
+        setPlanckValExternal(defaultValue)
     }
 
     return [planckVal, setPlanckValExternal, sscVal]
