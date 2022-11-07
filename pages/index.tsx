@@ -24,6 +24,7 @@ export default function Home() {
   const [currentEon, setCurrentEon] = useState<string | undefined>();
   const [_totalIssuance, setTotalIssuance, totalIssuanceSsc] =
     useSsc(undefined);
+  const [votesList, setVotes] = useState<any>();
 
   useEffect(() => {
     // Call the async function with a sideffect to set the API at the top level.
@@ -54,6 +55,13 @@ export default function Home() {
           updatedOffences[offenderOutput].push(offenceOutput);
         });
         setOffences(updatedOffences);
+      });
+      // Handle events
+      api.query.system.events((events: any) => {
+        const votes = events
+          .map((event: any) => event.toHuman())
+          .filter((e: any) => e.event.method === "FarmerVote");
+        setVotes(votes);
       });
       // Handles current eon
       api.query.subspace.eonIndex((index: any) => {
@@ -140,7 +148,33 @@ export default function Home() {
                     </table>
                   </div>
                 </div>
-                <div>placeholder</div>
+                {/* Last block events */}
+                <div className="flex flex-col space-y-10">
+                  <h1 className="text-xl text-center">Latest block votes</h1>
+                  <div className="table-wrapper h-[45vh] overflow-y-scroll">
+                    <table className="table-fixed w-full">
+                      <thead>
+                        <tr>
+                          <th>Public Key</th>
+                          <th>Reward Address</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {votesList?.sort().map((vote: Record<string, any>) => (
+                          <tr
+                            className="break-words"
+                            key={vote.event.data.publicKey}
+                          >
+                            <td className="p-4">{vote.event.data.publicKey}</td>
+                            <td className="p-4">
+                              {vote.event.data.rewardAddress}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           )}
